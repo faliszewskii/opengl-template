@@ -71,9 +71,17 @@ int main(int, char**)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+#else
     // Init GLEW
     glewExperimental = GL_TRUE;
     glewInit ();
+#endif
+
 
     // get version info
     const GLubyte* renderer = glGetString (GL_RENDERER); // get renderer string
