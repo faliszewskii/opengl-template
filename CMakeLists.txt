@@ -50,7 +50,8 @@ set(APP_SRC
         src/app/Scene.cpp
         src/app/Scene.h
         src/app/entity/light/PointLight.h
-        src/app/entity/point/Point.h)
+        src/app/entity/point/Point.h
+        src/opengl/model/Model.h)
 
 # Add executables
 add_executable(OpenGL_Template
@@ -92,5 +93,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")          # Linux
             -lXrandr
             -lXi
             -ldl
+            assimp
     )
 endif()

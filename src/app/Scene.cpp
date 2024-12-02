@@ -19,8 +19,10 @@ Scene::Scene(AppContext &appContext) : appContext(appContext) {
 
     appContext.quad = std::make_unique<Quad>();
     appContext.light = std::make_unique<PointLight>();
-    appContext.light->position = {0.0f , 0.0f, 0.25f};
+    appContext.light->position = {-0.5f , 0.25f, 0.25f};
     appContext.lightBulb = std::make_unique<Point>();
+
+    appContext.bunny = std::make_unique<Model>("../res/models/stanfordBunny.obj");
 }
 
 void Scene::update() {
@@ -32,17 +34,26 @@ void Scene::update() {
 void Scene::render() {
     appContext.frameBufferManager->bind();
 
+    auto quadModel = glm::identity<glm::mat4>();
+    quadModel = glm::rotate(quadModel, -float(std::numbers::pi / 2), glm::vec3(1, 0, 0));
+
+    auto bunnyModel = glm::identity<glm::mat4>();
+    bunnyModel = glm::scale(bunnyModel, glm::vec3(2));
+
     // TODO --- Here goes scene render.
     appContext.phongShader->use();
+    appContext.phongShader->setUniform("model", quadModel);
     appContext.phongShader->setUniform("viewPos", appContext.camera->getViewPosition());
     appContext.phongShader->setUniform("view", appContext.camera->getViewMatrix());
     appContext.phongShader->setUniform("projection", appContext.camera->getProjectionMatrix());
-    appContext.phongShader->setUniform("model", glm::identity<glm::mat4>());
     appContext.phongShader->setUniform("material.hasTexture", false);
     appContext.phongShader->setUniform("material.albedo", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
     appContext.phongShader->setUniform("material.shininess", 256.f);
     appContext.light->setupPointLight(*appContext.phongShader);
     appContext.quad->render();
+    appContext.phongShader->setUniform("material.albedo", glm::vec4(1.0f, 0.5f, 0.5f, 1.0f));
+    appContext.phongShader->setUniform("model", bunnyModel);
+    appContext.bunny->render();
 
     appContext.pointShader->use();
     appContext.pointShader->setUniform("view", appContext.camera->getViewMatrix());
