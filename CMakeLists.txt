@@ -26,6 +26,8 @@ set(IMGUI_SRC
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
 )
 
+add_subdirectory(dep/glfw)
+
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/dep/inc)
 
@@ -42,6 +44,11 @@ set(APP_SRC
         src/opengl/framebuffer/FrameBufferManager.h
         src/opengl/shader/Shader.h
         src/opengl/shader/Shader.cpp
+        src/opengl/mesh/is_vertex.h
+        src/opengl/mesh/PositionNormalVertex.h
+        src/opengl/mesh/PositionVertex.h
+        src/opengl/mesh/PosNorTexVertex.h
+        src/opengl/mesh/Mesh.h
         src/interface/camera/BaseCamera.h
         src/interface/camera/CameraAnchor.cpp
         src/interface/camera/CameraAnchor.h
@@ -53,13 +60,26 @@ set(APP_SRC
         src/app/entity/point/Point.h
         src/opengl/model/Model.h)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(GLAD_GLEW
+        dep/glad/glad.c
+        dep/glad/glad_glfw.h
+    )
+else()
+    set(GLAD_GLEW
+        dep/glew/glad.c
+        dep/glew/glew_glfw.h
+    )
+
+endif()
+
 # Add executables
 add_executable(OpenGL_Template
         # Dependencies
         ${IMGUI_SRC}
-        ${CMAKE_SOURCE_DIR}/src/glad.c
         # Application
         ${CMAKE_SOURCE_DIR}/src/main.cpp
+        ${GLAD_GLEW}
         ${APP_SRC}
 )
 
@@ -76,11 +96,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")             # macOS
             "-framework CoreFoundation"
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")        # Windows
+    find_package(glm CONFIG REQUIRED)
     find_package(OpenGL REQUIRED)
     include_directories( ${OPENGL_INCLUDE_DIRS})
-    target_link_libraries(OpenGL_Template
-            ${CMAKE_SOURCE_DIR}/dep/lib/glfw3.lib
-            ${CMAKE_SOURCE_DIR}/dep/lib/glew32.lib
+    target_link_libraries(OpenGL_Template PRIVATE
+            glm::glm
+            glfw
             ${OPENGL_LIBRARIES}
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")          # Linux
